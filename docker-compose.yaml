@@ -1,0 +1,34 @@
+version: "3"
+
+networks:
+  default:
+    external: false
+
+volumes:
+  influx_data:
+  api_data:
+
+services:
+  influx:
+    image: influxdb:1.7-alpine
+    ports:
+      - ${INFLUXDB_PORT}:8086
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - influx_data:/var/lib/influxdb
+      - ${PWD}/resources/init-fluxdb:/docker-entrypoint-initdb.d
+    env_file: [.env]
+
+  api:
+    image: dis2020/blockchain-auctions-api
+    build: ./
+    restart: on-failure
+    ports:
+      - 8000:8000
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - influx
+    env_file: [.env]
+    environment:
+      INFLUXDB_HOST: influx
