@@ -1,7 +1,14 @@
 const truffleContract = require('@truffle/contract');
-const contractData = require('../../build/contracts/SimpleStorage.json');
+const contractData = require('../../build/contracts/Auction.json');
 
-module.exports = class ContractController {
+class ContractController {
+
+    errors = {
+        INVALID_ADDRESS_FORMAT: 'invalid-address-format',
+        NOT_FOUND: 'not-found',
+        CONNECTION: 'connection-error'
+    }
+
     constructor(web3provider, account) {
         this._web3Connector = web3provider;
         this._contract = truffleContract(contractData);
@@ -11,7 +18,7 @@ module.exports = class ContractController {
 
     async deploy() {
         try {
-            const instance = await this.contract.new({from: this._account});
+            const instance = await this._contract.new({from: this._account});
             return true;
         } catch (error) {
             console.error(error);
@@ -20,4 +27,20 @@ module.exports = class ContractController {
 
     }
 
+    async getContractInformation(address) {
+        const instance = await this._contract.at(address);
+    }
+
+    async getInstance(address) {
+        const instance = await this._contract.at(address);
+    }
+
+    errorType(truffleError) {
+        if (truffleError.message && truffleError.message.includes('Invalid address')) {
+            return this.errors.INVALID_ADDRESS_FORMAT;
+        }
+    }
+
 }
+
+module.exports = ContractController;
