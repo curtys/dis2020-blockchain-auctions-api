@@ -3,9 +3,9 @@ const cors = require('cors');
 const Router = require('./routes.js');
 const Container = require('./container');
 
-function bootstrap() {
+async function bootstrap() {
 
-    const container = new Container();
+    const container = await Container.init();
 
     const port = container.config.port;
     const app = express();

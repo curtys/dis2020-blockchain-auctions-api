@@ -1,5 +1,7 @@
 const dotenv = require('dotenv');
 const ContractController = require('../controllers/contract-controller');
+const RedisConnector = require('../connectors/redis-connector');
+const AuctionController = require('../controllers/auction-controller');
 
 function loadConfig() {
     dotenv.config();
@@ -7,24 +9,32 @@ function loadConfig() {
         port: process.env.NODE_PORT,
         prettyLog: process.env.NODE_ENV == 'development',
 
-        influx: {
-            hostname: process.env.INFLUXDB_HOST,
-            port: process.env.INFLUXDB_PORT,
-            dbname: process.env.INFLUXDB_DBNAME,
-            user: process.env.INFLUXDB_ADMIN_USER,
-            password: process.env.INFLUXDB_ADMIN_PASSWORD,
+        redis: {
+            hostname: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT,
         },
 
         web3: {
-            provider: process.env.WEB3_PROVIDER
+            provider: process.env.WEB3_PROVIDER,
+            account: process.env.WEB3_ACCOUNT
         }
     };
 }
 
 class Container {
-    constructor() {
-        this.config = loadConfig();
-        this.contractController = new ContractController(this.config.web3.provider);
+    constructor(config, redis, contractController, auctionController) {
+        this.config = config;
+        this.redis = redis;
+        this.contractController = contractController;
+        this.auctionController = auctionController;
+    }
+
+    static async init() {
+        const config = loadConfig();
+        const redis = new RedisConnector(config.redis.hostname, config.redis.port);
+        const contractController = new ContractController(config.web3.provider, config.web3.account);
+        const auctionController = new AuctionController(redis, contractController);
+        return new Container(config, redis, contractController, auctionController);
     }
 }
 

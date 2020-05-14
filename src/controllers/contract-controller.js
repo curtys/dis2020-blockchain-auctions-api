@@ -2,19 +2,16 @@ const truffleContract = require('@truffle/contract');
 const contractData = require('../../build/contracts/SimpleStorage.json');
 
 module.exports = class ContractController {
-    constructor(web3Connector) {
-        this.web3Connector = web3Connector;
-        this.contract = truffleContract(contractData);
-        this.contract.setProvider(web3Connector);
-    }
-
-    world() {
-        return 'Hello World';
+    constructor(web3provider, account) {
+        this._web3Connector = web3provider;
+        this._contract = truffleContract(contractData);
+        this._contract.setProvider(web3provider);
+        this._account = account;
     }
 
     async deploy() {
         try {
-            const instance = await this.contract.new({from:'0x420952C36d821eDD39a8c39dE02fA8f7F907f8Db'});
+            const instance = await this.contract.new({from: this._account});
             return true;
         } catch (error) {
             console.error(error);

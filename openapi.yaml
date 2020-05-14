@@ -1,0 +1,169 @@
+openapi: 3.0.0
+info:
+  description: >-
+    Auctions API definition for the dis2020-blockchain-auctions project.
+  version: 1.0.0
+  title: Auctions API
+paths:
+  /auctions:
+    summary: Operations on auctions
+    post:
+      summary: Create a new auction
+      responses:
+        '204':
+          description: Created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Auction"
+    get:
+      summary: Get all auctions
+      parameters:
+        - name: active
+          in: query
+          required: false
+          description: Fetch only active auctions or all
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Auction"
+  /auctions/{id}:
+    get:
+      summary: Info for a specific auction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the auction to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Auction"
+        '404':
+          description: not found
+  /auctions/{id}/bid:
+    post:
+      summary: Bid on the auction with the given id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the auction to retrieve
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Bid"
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Auction"
+        '404':
+          description: not found
+  /auctions/{uname}/owner:
+    get:
+      summary: Get all auction where the user is the owner
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: The username
+          schema:
+            type: string
+        - name: active
+          in: query
+          required: false
+          description: Fetch only active auctions or all
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Auction"
+  /auctions/{uname}/bidder:
+    get:
+      summary: Get all auction where the user is the bidder
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: The username
+          schema:
+            type: string
+        - name: active
+          in: query
+          required: false
+          description: Fetch only active auctions or all
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Auction"
+components:
+  schemas:
+    Auction:
+      type: object
+      required:
+        - title
+        - owner
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        acive:
+          type: boolean
+        owner:
+          type: string
+        currentBid:
+          type: number
+        bidder:
+          type: string
+    Bid:
+      type: object
+      required:
+        - uname
+        - amount
+        - id
+      properties:
+        uname:
+          type: string
+        amount:
+          type: number
+          format: float
+        id:
+          type: string
