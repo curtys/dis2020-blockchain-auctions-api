@@ -79,9 +79,9 @@ paths:
                 $ref: "#/components/schemas/Auction"
         '404':
           description: not found
-  /auctions/{uname}/owner:
+  /auctions/{uname}/seller:
     get:
-      summary: Get all auction where the user is the owner
+      summary: Get all auction where the user is the seller
       parameters:
         - name: uname
           in: path
@@ -137,7 +137,7 @@ components:
       type: object
       required:
         - title
-        - owner
+        - seller
       properties:
         title:
           type: string
@@ -147,7 +147,7 @@ components:
           type: string
         acive:
           type: boolean
-        owner:
+        seller:
           type: string
         currentBid:
           type: number

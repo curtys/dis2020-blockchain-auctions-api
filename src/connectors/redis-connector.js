@@ -21,11 +21,6 @@ class RedisConnector {
         return this._redis.hget(h_key, field);
     }
 
-    async removeHash(namespace, id) {
-        const h_key = `${namespace}:${id}`;
-        return this._redis.hget(h_key, field);
-    }
-
     async addSet(namespace, id, obj) {
         const s_key = `${namespace}:${id}`;
         const result = await this._redis.sadd(s_key, obj);
@@ -37,6 +32,12 @@ class RedisConnector {
         return this._redis.smembers(s_key);
     }
 
+    async removeFromSet(namespace, id, obj) {
+        const s_key = `${namespace}:${id}`;
+        const result = await this._redis.srem(s_key, obj);
+        return this._isSuccess(result);
+    }
+
     async existsHash(namespace, id) {
         const h_key = `${namespace}:${id}`;
         const len = await this._redis.hlen(h_key);
@@ -46,6 +47,12 @@ class RedisConnector {
     async clearHashField(namespace, id, field) {
         const h_key = `${namespace}:${id}`;
         await this._redis.hdel(h_key, field);
+    }
+
+    async deleteKey(namespace, id) {
+        const key = `${namespace}:${id}`;
+        const result = await this._redis.del(key);
+        return this._isSuccess(result);
     }
 
     getIdFromKey(key) {

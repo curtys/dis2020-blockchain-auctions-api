@@ -32,9 +32,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     depends_on:
-      - influx
       - redis
     env_file: [.env]
     environment:
-      INFLUXDB_HOST: influx
       REDIS_HOST: redis

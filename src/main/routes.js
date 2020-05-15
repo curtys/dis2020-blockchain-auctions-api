@@ -6,14 +6,15 @@ router.get('/ping', (req, res) => {
     res.sendStatus(200);
 });
 
-router.post('/auctions', async (req, res, next) => {
-    // const result = await container(req).contractController.deploy();
-    // if (result === true) res.sendStatus(204);
-    // else res.sendStatus(500);
+router.post('/auctions', async (req, res) => {
     const auction = req.body;
     console.log(auction);
-    await container(req).auctionController.createAuction(auction);
-    res.sendStatus(204);
+    try {
+        const id = await container(req).auctionController.createAuction(auction);
+        res.send(id);
+    } catch (error) {
+        return handleError(error, res);
+    }
 });
 
 router.get('/auctions/:id', async (req, res) => {
@@ -23,13 +24,18 @@ router.get('/auctions/:id', async (req, res) => {
         return;
     }
     const auction = new Auction(id, 'jerry', 'auction1', 'blah');
-    const result = await container(req).auctionController.getAuction(id);
-    if (!result) {
-        res.sendStatus(404);
-        return;
+
+    try {
+        const result = await container(req).auctionController.getAuction(id);
+        if (!result) {
+            res.sendStatus(404);
+            return;
+        }
+        res.send(result);
+
+    } catch (error) {
+        return handleError(error, res);
     }
-    console.log(result);
-    res.send(result);
 });
 
 router.post('/auctions/:id/bid', async (req, res) => {
@@ -54,8 +60,8 @@ router.get('/auctions', async (req, res, next) => {
     res.send(result);
 });
 
-router.get('/auctions/user/:uname/owner', async (req, res, next) => {
-    auctionsOfUser(req, res, 'owner');
+router.get('/auctions/user/:uname/seller', async (req, res, next) => {
+    auctionsOfUser(req, res, 'seller');
 });
 
 router.get('/auctions/user/:uname/bidder', async (req, res, next) => {
@@ -74,6 +80,11 @@ async function auctionsOfUser(req, res, role) {
 
 function container(req) {
     return req.app.locals.container;
+}
+
+function handleError(error, res) {
+    console.error(error.stack);
+    res.sendStatus(500);
 }
 
 module.exports = router;
