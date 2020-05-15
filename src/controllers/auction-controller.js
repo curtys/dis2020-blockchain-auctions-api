@@ -1,3 +1,5 @@
+const BidResult = require('../models/bid-result');
+
 const NS_BIDDER = 'bidders';
 const NS_SELLER = 'sellers';
 const NS_AUCTION = 'auctions';
@@ -44,8 +46,24 @@ class AuctionController {
         if (!success || !setRes1 || !setRes2) {
             throw new Error(`Could not create entries in Redis for auction id ${id}`);
         }
-        console.log(`Mapped auction with id ${id}`);
+        console.debug(`Mapped auction with id ${id}`);
         return id;
+    }
+
+    async bidOnAuction(id, bid) {
+        const exists = await this._connector.existsHash(NS_AUCTION, id);
+        if (!exists) return null;
+        const hash = await this._connector.getHash(NS_AUCTION, id);
+        console.log(hash);
+        if (!hash.active) return new BidResult({reason: 'auction closed'});
+
+        const errorHandler = this._createErrorHandler(id);
+        try {
+            const result = await this._contractController.placeBid(id, bid);
+            const storageResult = await this._connector.addSet(NS_BIDDER, bid.user, id);
+        } catch (error) {
+            errorHandler(error);
+        }
     }
 
     async _filterActive(set) {

@@ -26,4 +26,10 @@ contract Auction {
         string memory, string memory, uint, bool) {
         return (seller, title, description, currentBid.bidder, currentBid.bid, active);
     }
+
+    function bid(string memory bidder, uint bidAmount) public returns (bool accepted, string memory reason) {
+        if (!active) return (false, "auction is not active");
+        if (keccak256(bytes(seller)) == keccak256(bytes(bidder))) return (false, "seller cannot bid");
+        if (bidAmount >= currentBid.bid) return (false, "not highest bid");
+    }
 }

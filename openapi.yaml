@@ -145,7 +145,7 @@ components:
           type: string
         id:
           type: string
-        acive:
+        active:
           type: boolean
         seller:
           type: string
@@ -166,4 +166,13 @@ components:
           type: number
           format: float
         id:
+          type: string
+    BidResult:
+      type: object
+      properties:
+        auction:
+          $ref: "#/components/schemas/Auction"
+        accepted:
+          type: boolean
+        reason:
           type: string

@@ -14,7 +14,7 @@ router.post('/auctions', async (req, res) => {
         res.contentType('text/plain');
         res.send(id);
     } catch (error) {
-        return handleError(error, res);
+        handleError(error, res);
     }
 });
 
@@ -24,8 +24,6 @@ router.get('/auctions/:id', async (req, res) => {
         res.sendStatus(400);
         return;
     }
-    const auction = new Auction(id, 'jerry', 'auction1', 'blah');
-
     try {
         const result = await container(req).auctionController.getAuction(id);
         if (!result) {
@@ -35,7 +33,7 @@ router.get('/auctions/:id', async (req, res) => {
         res.send(result);
 
     } catch (error) {
-        return handleError(error, res);
+        handleError(error, res);
     }
 });
 
@@ -46,37 +44,49 @@ router.post('/auctions/:id/bid', async (req, res) => {
         res.sendStatus(400);
         return;
     }
-    const auction = new Auction(id, 'jerry', 'auction1', 'blah');
-    const result = await container(req).auctionController.getAuction(id);
-    if (!result) {
-        res.sendStatus(404);
-        return;
+
+    try {
+        const result = await container(req).auctionController.bidOnAuction(id, bid)
+        if (!result) {
+            res.sendStatus(404);
+            return;
+        }
+        console.log(result);
+        res.send(result);
+    } catch (error) {
+        handleError(error);
     }
-    console.log(result);
-    res.send(result);
 });
 
-router.get('/auctions', async (req, res, next) => {
-    const result = await container(req).auctionController.getAuctions();
-    res.send(result);
+router.get('/auctions', async (req, res) => {
+    try {
+        const result = await container(req).auctionController.getAuctions();
+        res.send(result);
+    } catch (error) {
+        handleError(error);
+    }
 });
 
-router.get('/auctions/user/:uname/seller', async (req, res, next) => {
+router.get('/auctions/user/:uname/seller', async (req, res) => {
     auctionsOfUser(req, res, 'seller');
 });
 
-router.get('/auctions/user/:uname/bidder', async (req, res, next) => {
+router.get('/auctions/user/:uname/bidder', async (req, res) => {
     auctionsOfUser(req, res, 'bidder');
 });
 
 async function auctionsOfUser(req, res, role) {
-    const uname = req.params.uname;
-    if (!uname) {
-        res.sendStatus(400);
-        return;
+    try {
+        const uname = req.params.uname;
+        if (!uname) {
+            res.sendStatus(400);
+            return;
+        }
+        const result = await container(req).auctionController.getAuctionsOfUser(uname, role);
+        res.send(result);
+    } catch (error) {
+        handleError(error);
     }
-    const result = await container(req).auctionController.getAuctionsOfUser(uname, role);
-    res.send(result);
 } 
 
 function container(req) {

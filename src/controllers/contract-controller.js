@@ -1,6 +1,7 @@
 const truffleContract = require('@truffle/contract');
 const contractData = require('../../build/contracts/Auction.json');
 const Auction = require('../models/auction');
+const BidResult = require('../models/bid-result');
 
 class ContractController {
 
@@ -25,14 +26,22 @@ class ContractController {
         return instance.address;
     }
 
-    async getContractInformation(address) {
-        const instance = await this._contract.at(address);
+    async getContractInformation(address, instance) {
+        instance = instance || await this._contract.at(address);
         const result = await instance.getInformation();
         const auction = new Auction({seller: result['0'], title: result['1'], description: result['2']});
         auction.id = address;
         console.debug(`Retrieved contract information at address ${address}:`);
         console.debug(auction);
         return auction;
+    }
+
+    async placeBid(address, bid) {
+        const instance = await this._contract.at(address);
+        const result = await instance.bid(bid.user, bid.amount);
+        const auction = await this.getContractInformation(address, instance);
+        const bidResult = new BidResult({auction: auction})
+        return bidResult;
     }
 
     async getInstance(address) {
