@@ -5,9 +5,7 @@ networks:
     external: false
 
 volumes:
-  influx_data:
   redis_data:
-  api_data:
 
 services:
   redis:

@@ -11,6 +11,7 @@ router.post('/auctions', async (req, res) => {
     console.log(auction);
     try {
         const id = await container(req).auctionController.createAuction(auction);
+        res.contentType('text/plain');
         res.send(id);
     } catch (error) {
         return handleError(error, res);

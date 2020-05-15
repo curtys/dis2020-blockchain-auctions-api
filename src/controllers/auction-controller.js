@@ -19,7 +19,7 @@ class AuctionController {
     }
 
     async getAuctions(onlyActive) {
-        const auctionIds = this._lookupAuctionIds(NS_AUCTION, 'all', onlyActive);
+        const auctionIds = await this._lookupAuctionIds(NS_AUCTION, 'all', onlyActive);
         if (!(Array.isArray(auctionIds) && auctionIds.length > 0)) return [];
         return await this._collectAuctionsData(auctionIds);
     }
@@ -27,13 +27,13 @@ class AuctionController {
     async getAuctionsOfUser(username, role, onlyActive) {
         let namespace = NS_BIDDER;
         if (role === 'seller') namespace = NS_SELLER;
-        const auctionIds = this._lookupAuctionIds(namespace, username, onlyActive);
+        const auctionIds = await this._lookupAuctionIds(namespace, username, onlyActive);
         if (!(Array.isArray(auctionIds) && auctionIds.length > 0)) return [];
         return await this._collectAuctionsData(auctionIds);
     }
 
     async createAuction(auction) {
-        const id = await this._contractController.newAuction(auction);
+        const id = await this._contractController.newContract(auction);
         if (!id) throw new Error(`No contract address received.`);
         const success = await this._connector.addHash(NS_AUCTION, id, {active:true});
         let setRes1, setRes2;
