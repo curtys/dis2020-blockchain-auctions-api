@@ -8,7 +8,7 @@ router.get('/ping', (req, res) => {
 
 router.post('/auctions', async (req, res) => {
     const auction = req.body;
-    console.log(auction);
+    console.debug(auction);
     try {
         const id = await container(req).auctionController.createAuction(auction);
         res.contentType('text/plain');
@@ -51,10 +51,25 @@ router.post('/auctions/:id/bid', async (req, res) => {
             res.sendStatus(404);
             return;
         }
-        console.log(result);
+        console.debug(result);
         res.send(result);
     } catch (error) {
-        handleError(error);
+        handleError(error, res);
+    }
+});
+
+router.post('/auctions/:id/close', async (req, res) => {
+    const id = req.params.id;
+    try {
+        const result = await container(req).auctionController.closeAuction(id);
+        if (!result) {
+            res.sendStatus(404);
+            return;
+        }
+        console.debug(result);
+        res.send(result);
+    } catch (error) {
+        handleError(error, res);
     }
 });
 
@@ -63,7 +78,7 @@ router.get('/auctions', async (req, res) => {
         const result = await container(req).auctionController.getAuctions();
         res.send(result);
     } catch (error) {
-        handleError(error);
+        handleError(error, res);
     }
 });
 
@@ -85,7 +100,7 @@ async function auctionsOfUser(req, res, role) {
         const result = await container(req).auctionController.getAuctionsOfUser(uname, role);
         res.send(result);
     } catch (error) {
-        handleError(error);
+        handleError(error, res);
     }
 } 
 

@@ -21,6 +21,11 @@ class RedisConnector {
         return this._redis.hget(h_key, field);
     }
 
+    async setHashField(namespace, id, field, value) {
+        const h_key = `${namespace}:${id}`;
+        return this._redis.hset(h_key, field, value);
+    }
+
     async addSet(namespace, id, obj) {
         const s_key = `${namespace}:${id}`;
         const result = await this._redis.sadd(s_key, obj);

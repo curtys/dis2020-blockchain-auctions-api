@@ -1,6 +1,7 @@
 class BidResult {
     accepted = false;
-    reason = '';
+    reason;
+    auction;
 
     constructor(obj) {
         Object.assign(this, obj);

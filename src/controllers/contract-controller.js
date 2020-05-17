@@ -8,7 +8,9 @@ class ContractController {
     errors = {
         INVALID_ADDRESS_FORMAT: 'invalid-address-format',
         NOT_FOUND: 'not-found',
-        CONNECTION: 'connection-error'
+        CONNECTION: 'connection-error',
+        REVERT_TRANSACTION: 'revert-transaction',
+        UNKNOWN: 'unknown'
     }
 
     constructor(web3provider, account) {
@@ -21,15 +23,20 @@ class ContractController {
     
     async newContract(auction) {
         const instance = await this._contract.new(auction.seller, auction.title, 
-            auction.description);
+            auction.description, auction.duration);
         console.debug(`Created new auction at ${instance.address}`);
         return instance.address;
     }
 
-    async getContractInformation(address, instance) {
+    async getContractInformation(address, instance, update) {
         instance = instance || await this._contract.at(address);
+        if (!!update) {
+            await this._updateAuctionState(instance);
+        }
         const result = await instance.getInformation();
-        const auction = new Auction({seller: result['0'], title: result['1'], description: result['2']});
+        const auction = new Auction({seller: result['0'], title: result['1'], 
+            description: result['2'], highestBidder: result['3'], amount: result['4'].toNumber(),
+            endTime: result['5'].toNumber(), closed: result['6']});
         auction.id = address;
         console.debug(`Retrieved contract information at address ${address}:`);
         console.debug(auction);
@@ -39,13 +46,15 @@ class ContractController {
     async placeBid(address, bid) {
         const instance = await this._contract.at(address);
         const result = await instance.bid(bid.user, bid.amount);
-        const auction = await this.getContractInformation(address, instance);
-        const bidResult = new BidResult({auction: auction})
+        const event = this._extractEvent(result);
+        const auction = await this.getContractInformation(address, instance, true);
+        const bidResult = new BidResult({accepted: event.args.accepted, auction: auction})
         return bidResult;
     }
 
-    async getInstance(address) {
+    async closeAuction(address) {
         const instance = await this._contract.at(address);
+        const result = await instance.close();
     }
 
     errorType(truffleError) {
@@ -55,6 +64,21 @@ class ContractController {
         if (truffleError.message && truffleError.message.includes('no code at address')) {
             return this.errors.NOT_FOUND;
         }
+        if (truffleError.message && truffleError.message.includes('revert')) {
+            return this.errors.REVERT_TRANSACTION;
+        }
+        return this.errors.UNKNOWN;
+    }
+
+    _extractEvent(transactionResult) {
+        if (transactionResult.logs && transactionResult.logs.length > 0) {
+            return transactionResult.logs[0];
+        }
+        return null;
+    }
+
+    async _updateAuctionState(instance) {
+        await instance.updateState();
     }
 
 }

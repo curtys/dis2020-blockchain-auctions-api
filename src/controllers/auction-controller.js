@@ -54,13 +54,27 @@ class AuctionController {
         const exists = await this._connector.existsHash(NS_AUCTION, id);
         if (!exists) return null;
         const hash = await this._connector.getHash(NS_AUCTION, id);
-        console.log(hash);
         if (!hash.active) return new BidResult({reason: 'auction closed'});
 
         const errorHandler = this._createErrorHandler(id);
         try {
             const result = await this._contractController.placeBid(id, bid);
             const storageResult = await this._connector.addSet(NS_BIDDER, bid.user, id);
+            return result;
+        } catch (error) {
+            return errorHandler(error);
+        }
+    }
+
+    async closeAuction(id) {
+        const exists = await this._connector.existsHash(NS_AUCTION, id);
+        if (!exists) return null;
+        const errorHandler = this._createErrorHandler(id);
+        try {
+            await this._contractController.closeAuction(id);
+            const storageResult = await this._connector.setHashField(NS_AUCTION, id, 'active', false);
+            const auction = await this._contractController.getContractInformation(id);
+            return auction;
         } catch (error) {
             errorHandler(error);
         }
@@ -92,7 +106,7 @@ class AuctionController {
 
     async _retrieveAuctionContractData(id, errorHandler) {
         try {
-            return await this._contractController.getContractInformation(id);
+            return await this._contractController.getContractInformation(id, null, true);
         } catch (error) {
             errorHandler(error);
        }
@@ -116,6 +130,10 @@ class AuctionController {
                     // remove auction id from the principal set
                     if (namespace && principal) this._connector.removeFromSet(namespace, principal, auctionId);
                     break;
+                case this._contractController.errors.REVERT_TRANSACTION:
+                    message = `Transaction requirements not fulfilled. Transaction was reverted: ${error.message} ${auctionId}`;
+                    console.error(message);
+                    return new BidResult({accepted: false, reason: message});
             
                 default:
                     throw error

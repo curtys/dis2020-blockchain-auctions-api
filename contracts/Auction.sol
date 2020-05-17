@@ -39,7 +39,7 @@ contract Auction is owned {
         seller = _seller;
         title = _title;
         description = _description;
-        endTime = now + _duration;
+        endTime = now + (_duration * 1 minutes);
     }
 
     function getInformation() public view returns (string memory, string memory,
@@ -48,29 +48,31 @@ contract Auction is owned {
     }
 
     function bid(string memory bidder, uint64 amount) public {
-        require(updateState(), "auction is closed");
+        require(!isClosed(), "auction is closed");
         require(
             (keccak256(bytes(seller)) != keccak256(bytes(bidder))),
             "seller cannot bid"
         );
 
         uint bidId = numBids++;
-        bool accepted = (amount >= currentBid.amount);
+        bool accepted = (amount > currentBid.amount);
 
         Bid memory newBid = Bid(bidder, amount, accepted);
         bids[bidId] = newBid;
 
         if (accepted) currentBid = newBid;
         emit BidReceived(bidder, amount, accepted, bidId);
+        updateState();
     }
 
-    function updateState() public returns (bool) {
-        if (closed) return false;
-        if (now > endTime) {
+    function updateState() public {
+        if (!closed && isClosed()) {
             close();
-            return false;
         }
-        return !closed && now <= endTime;
+    }
+
+    function isClosed() public view returns (bool) {
+        return closed || now > endTime;
     }
 
     function setClosed(bool a) external restricted { closed = a; }
