@@ -36,3 +36,4 @@ nbproject/
 node/
 node_modules/
 typings/
+.env
