@@ -18,13 +18,21 @@ To start up the application stack with Docker:
 
 **Before starting the server, copy .env.example as .env and fill in the TODO fields.** The provided values are defaults for Redis and Ganache.
 
-To startup the application, run
+Install the dependencies and node modules:
+
+    $ npm install
+
+To compile the contracts in `/contracts` run
+
+    $ truffle compile
+
+Afterwards run the server with
 
     $ npm start
 
 It's possible to startup the application stack with docker-compose:
 
-    $ docker-compose up -d # Starts the api server and redis
+    $ docker-compose up -d # Starts the api server, Redis and Ganache
 
 ### Cleanup Docker volumes
 
