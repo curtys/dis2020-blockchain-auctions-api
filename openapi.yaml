@@ -76,7 +76,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Auction"
+                $ref: '#/components/schemas/BidResult'
         '404':
           description: not found
   /auctions/{uname}/seller:
@@ -139,20 +139,28 @@ components:
         - title
         - seller
       properties:
+        id:
+          type: string
+        seller:
+          type: string
         title:
           type: string
         description:
           type: string
-        id:
+        highestBidder:
           type: string
-        active:
-          type: boolean
-        seller:
-          type: string
-        currentBid:
+        amount:
           type: number
-        bidder:
-          type: string
+        endTime:
+          type: number
+          format: uint64
+          description: seconds since UNIX epoch
+        closed:
+          type: boolean
+        duration:
+          type: number
+          format: uint64
+          description: duration in minutes
     Bid:
       type: object
       required:
@@ -164,7 +172,7 @@ components:
           type: string
         amount:
           type: number
-          format: float
+          format: uint64
         id:
           type: string
     BidResult:
