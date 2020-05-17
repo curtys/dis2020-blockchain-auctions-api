@@ -13,12 +13,13 @@ class ContractController {
         UNKNOWN: 'unknown'
     }
 
-    constructor(web3provider, account) {
-        this._web3Connector = web3provider;
+    constructor(web3providerHost, web3ProviderPort, account) {
+        this._web3provider = `${web3providerHost}:${web3ProviderPort}`;
         this._contract = truffleContract(contractData);
-        this._contract.setProvider(web3provider);
+        this._contract.setProvider(this._web3provider);
         this._contract.defaults({from: account});
         this._account = account;
+        console.debug(`Using Web3 provider ${this._web3provider}`);
     }
     
     async newContract(auction) {

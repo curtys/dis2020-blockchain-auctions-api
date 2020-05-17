@@ -15,7 +15,8 @@ function loadConfig() {
         },
 
         web3: {
-            provider: process.env.WEB3_PROVIDER,
+            host: process.env.WEB3_PROVIDER_HOST,
+            port: process.env.WEB3_PROVIDER_PORT,
             account: process.env.WEB3_ACCOUNT
         }
     };
@@ -32,7 +33,7 @@ class Container {
     static async init() {
         const config = loadConfig();
         const redis = new RedisConnector(config.redis.hostname, config.redis.port);
-        const contractController = new ContractController(config.web3.provider, config.web3.account);
+        const contractController = new ContractController(config.web3.host, config.web3.port, config.web3.account);
         const auctionController = new AuctionController(redis, contractController);
         return new Container(config, redis, contractController, auctionController);
     }
