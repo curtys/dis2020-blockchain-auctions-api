@@ -42,11 +42,15 @@ contract Auction is owned {
         endTime = now + (_duration * 1 minutes);
     }
 
+    // Returns the information about the auctions current state
     function getInformation() public view returns (string memory, string memory,
         string memory, string memory, uint, uint, bool) {
         return (seller, title, description, currentBid.bidder, currentBid.amount, endTime, closed);
     }
 
+    // Place a bid. The auction must not be closed and the seller is not allowed to bid.
+    // The bid is accepted if it is currently the highest bid. In any case, the bid is mapped
+    // and a BidReceived event is emitted.
     function bid(string memory bidder, uint64 amount) public {
         require(!isClosed(), "auction is closed");
         require(
@@ -65,18 +69,20 @@ contract Auction is owned {
         updateState();
     }
 
+    // closes the auction if the auction has ended,
+    // i.e. the auctions was open for the duration set at creation
     function updateState() public {
         if (!closed && isClosed()) {
             close();
         }
     }
 
+    // check if the auction has already been closed or has ended
     function isClosed() public view returns (bool) {
         return closed || now > endTime;
     }
 
-    function setClosed(bool a) external restricted { closed = a; }
-
+    // close the auction and emit the AuctionClosed event
     function close() public restricted {
         closed = true;
         emit AuctionClosed(currentBid.bidder, currentBid.amount);
