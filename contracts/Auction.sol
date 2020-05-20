@@ -88,4 +88,7 @@ contract Auction is owned {
         closed = true;
         emit AuctionClosed(currentBid.bidder, currentBid.amount);
     }
+
+    // function for testing
+    function setClosed(bool a) external restricted { closed = a; }
 }
