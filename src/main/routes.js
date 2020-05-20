@@ -66,8 +66,7 @@ router.post('/auctions/:id/close', async (req, res) => {
             res.sendStatus(404);
             return;
         }
-        console.debug(result);
-        res.send(result);
+        res.sendStatus(204);
     } catch (error) {
         handleError(error, res);
     }

@@ -79,6 +79,21 @@ paths:
                 $ref: '#/components/schemas/BidResult'
         '404':
           description: not found
+  /auctions/{id}/close:
+    post:
+      summary: Close the auction with the given id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the auction to retrieve
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Expected response to a valid request
+        '404':
+          description: not found
   /auctions/{uname}/seller:
     get:
       summary: Get all auction where the user is the seller

@@ -59,8 +59,10 @@ class ContractController {
     }
 
     async closeAuction(address) {
+        this._unlock();
         const instance = await this._contract.at(address);
         const result = await instance.close();
+        return result;
     }
 
     errorType(truffleError) {
