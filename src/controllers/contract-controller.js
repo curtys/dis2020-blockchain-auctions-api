@@ -89,7 +89,7 @@ class ContractController {
 
     _unlock() {
         if (process.env.WEB3_ACCOUNT_PASSWORD) {
-            console.debug(`-> Unlocking account ${this._account} with ${process.env.WEB3_ACCOUNT_PASSWORD}`);
+            console.debug(`-> Unlocking account ${this._account}`);
             this._web3.eth.personal.unlockAccount(this._account, process.env.WEB3_ACCOUNT_PASSWORD, 36000);
         }
     }
