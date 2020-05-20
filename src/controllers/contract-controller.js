@@ -2,6 +2,7 @@ const truffleContract = require('@truffle/contract');
 const contractData = require('../../build/contracts/Auction.json');
 const Auction = require('../models/auction');
 const BidResult = require('../models/bid-result');
+const Web3 = require('web3');
 
 class ContractController {
 
@@ -14,7 +15,8 @@ class ContractController {
     }
 
     constructor(web3providerHost, web3ProviderPort, account) {
-        this._web3provider = `${web3providerHost}:${web3ProviderPort}`;
+        this._web3provider = new Web3.providers.HttpProvider(`${web3providerHost}:${web3ProviderPort}`);
+        this._web3 = new Web3(this._web3provider);
         this._contract = truffleContract(contractData);
         this._contract.setProvider(this._web3provider);
         this._contract.defaults({from: account});
@@ -23,6 +25,7 @@ class ContractController {
     }
     
     async newContract(auction) {
+        this._unlock();
         const instance = await this._contract.new(auction.seller, auction.title, 
             auction.description, auction.duration);
         console.debug(`Created new auction at ${instance.address}`);
@@ -30,6 +33,7 @@ class ContractController {
     }
 
     async getContractInformation(address, instance, update) {
+        this._unlock();
         instance = instance || await this._contract.at(address);
         if (!!update) {
             await this._updateAuctionState(instance);
@@ -45,6 +49,7 @@ class ContractController {
     }
 
     async placeBid(address, bid) {
+        this._unlock();
         const instance = await this._contract.at(address);
         const result = await instance.bid(bid.user, bid.amount);
         const event = this._extractEvent(result);
@@ -80,6 +85,13 @@ class ContractController {
 
     async _updateAuctionState(instance) {
         await instance.updateState();
+    }
+
+    _unlock() {
+        if (process.env.WEB3_ACCOUNT_PASSWORD) {
+            console.debug(`-> Unlocking account ${this._account} with ${process.env.WEB3_ACCOUNT_PASSWORD}`);
+            this._web3.eth.personal.unlockAccount(this._account, process.env.WEB3_ACCOUNT_PASSWORD, 36000);
+        }
     }
 
 }
