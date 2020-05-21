@@ -5,7 +5,7 @@ module.exports = {
                          // Can also be set to "native" to use a native solc
       docker: true,      // Use a version obtained through docker
       parser: "solcjs",  // Leverages solc-js purely for speedy parsing
-      //evmVersion: "homesteade" // Default: "petersburg"
+      evmVersion: "homestead" // Default: "petersburg"
     }
   },
   // Uncommenting the defaults below 
