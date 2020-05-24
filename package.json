@@ -23,7 +23,8 @@
   "scripts": {
     "start": "node ./src/main/server.js",
     "start:watch": "nodemon --watch '{src,test}/**/*' --exec node ./src/main/server.js",
-    "clean": "rimraf -r node_modules/"
+    "clean": "rimraf -r node_modules/",
+    "test": "truffle test"
   },
   "author": "scurty",
   "license": "MIT"
